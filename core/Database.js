@@ -269,8 +269,9 @@ class Database {
 
            if (selectRows.length === 0) {
                let userId = uuidv4();
+               let isUserActive = userModel["active"] === "true" ? 1 : 0;
                query = "INSERT INTO \"Users\" (id, active, \"userName\", \"givenName\", \"middleName\", \"familyName\", email) \
-                         VALUES ('" + userId +"', '" + userModel["active"] + "', '" + userModel["userName"] +
+                         VALUES ('" + userId +"', " + isUserActive + ", '" + userModel["userName"] +
                         "', '" + userModel["givenName"] + "', '" + userModel["middleName"] + "', '" +
                         userModel["familyName"] + "', '" + userModel["email"] + "')";
 
