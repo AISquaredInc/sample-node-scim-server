@@ -267,7 +267,7 @@ class Database {
            let selectResult = await knex.raw(query);
            let selectRows = selectResult.rows;
 
-           if (rows.length === 0) {
+           if (selectRows.length === 0) {
                let userId = uuidv4();
                query = "INSERT INTO \"Users\" (id, active, \"userName\", \"givenName\", \"middleName\", \"familyName\", email) \
                          VALUES ('" + userId +"', '" + userModel["active"] + "', '" + userModel["userName"] +
