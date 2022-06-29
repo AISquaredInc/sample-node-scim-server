@@ -278,7 +278,7 @@ class Database {
                try {
                    let insertResult = await knex.raw(query);
                    let groups = userModel["groups"];
-
+                   out.log("DEBUG", "Database.createUser::GROUPS", "Received " + groups.length + " groups for user " + userId);
                    if (groups.length === 0) {
                        callback(scimCore.createSCIMUser(userId, true, userModel["userName"], userModel["givenName"],
                            userModel["middleName"], userModel["familyName"], userModel["email"],
