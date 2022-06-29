@@ -565,8 +565,8 @@ class Database {
     static async getGroupMemberships(callback) {
         let query = "SELECT m.groupId, m.userId, g.displayName, u.givenName, u.familyName " +
                     "FROM \"GroupMemberships\" m " +
-                    "LEFT JOIN \"Groups\" g ON m.groupId = g.id " +
-                    "LEFT JOIN \"Users\" u ON m.userId = u.id";
+                    "LEFT JOIN \"Groups\" g ON m.\"groupId\" = g.id " +
+                    "LEFT JOIN \"Users\" u ON m.\"userId\" = u.id";
         try {
             let result = await knex.raw(query);
             let rows = result.rows;
