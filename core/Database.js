@@ -337,7 +337,7 @@ class Database {
             if (rows.length === 0) {
                 let groupId = uuidv4();
 
-                query = "INSERT INTO Groups (id, \"displayName\") \
+                query = "INSERT INTO \"Groups\" (id, \"displayName\") \
                          VALUES ('" + groupId + "', '" + groupModel["displayName"] + "')";
 
                 try {
