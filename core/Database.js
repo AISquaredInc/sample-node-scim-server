@@ -224,7 +224,9 @@ class Database {
                     if (err !== null) {
                         callback(scimCore.createSCIMError(err, "400"));
                     } else {
-                        rows[0]["groups"] = self.getGroupsForUser(rows[0]["id"], memberships);
+                        if (memberships !== null) {
+                            rows[0]["groups"] = self.getGroupsForUser(rows[0]["id"], memberships);
+                        }
                         callback(scimCore.parseSCIMUser(rows[0], reqUrl));
                     }
                 });
