@@ -88,8 +88,6 @@ class Users {
     }
 
     static createUser(req, res) {
-        out.log("INFO", "Users.createUser", "Got request: " + req.url);
-
         let urlParts = url.parse(req.url, true);
         let reqUrl = urlParts.pathname;
         let requestBody = "";
