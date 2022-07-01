@@ -304,7 +304,9 @@ class Database {
                        query = query + ";";
 
                        try {
-                           let membershipInsert = await knex.raw(query);
+                            if (groups.length > 0) {
+                                let membershipInsert = await knex.raw(query);
+                            }
                            callback(scimCore.createSCIMUser(userId, true, userModel["userName"], userModel["givenName"],
                                userModel["middleName"], userModel["familyName"], userModel["email"],
                                groups, reqUrl));
@@ -369,7 +371,9 @@ class Database {
                         query = query + ";";
 
                         try {
-                            let groupMembershipInsert = await knex.raw(query);
+                            if (members.length > 0) {
+                                let groupMembershipInsert = await knex.raw(query);
+                            }
                             callback(scimCore.createSCIMGroup(groupId, groupModel["displayName"], members, reqUrl));
                         } catch (e) {
                             out.error("Database.createGroup::MEMBERSHIPS", err);
@@ -494,7 +498,9 @@ class Database {
                     query = query + ";";
 
                     try {
-                        let insertGroupMembershipsResult = await knex.raw(query);
+                        if (groups.length > 0) {
+                            let insertGroupMembershipsResult = await knex.raw(query);
+                        }
                         callback(scimCore.createSCIMUser(userId, rows.active, userModel["userName"], userModel["givenName"],
                             userModel["middleName"], userModel["familyName"], userModel["email"],
                             groups, reqUrl));
