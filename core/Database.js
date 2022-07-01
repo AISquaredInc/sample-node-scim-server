@@ -249,8 +249,8 @@ class Database {
                     if (err !== null) {
                         callback(scimCore.createSCIMError(err, "400"));
                     } else {
-                        rows["members"] = self.getUsersForGroup(rows["id"], memberships);
-                        callback(scimCore.parseSCIMGroup(rows, reqUrl));
+                        rows[0]["members"] = self.getUsersForGroup(rows[0]["id"], memberships);
+                        callback(scimCore.parseSCIMGroup(rows[0], reqUrl));
                     }
                 });
             }
