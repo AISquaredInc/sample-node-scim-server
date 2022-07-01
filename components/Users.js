@@ -94,12 +94,8 @@ class Users {
         let reqUrl = urlParts.pathname;
         let requestBody = "";
 
-        if (!req.data) {
-            res.writeHead(400, {"Content-Type": "text/plain"});
-            res.end();
-        }
-
         req.on('data', function (data) {
+            out.log("INFO", "Users.createUser", "Entered onData");
             requestBody += data;
             let userJsonData = JSON.parse(requestBody);
 
@@ -117,14 +113,17 @@ class Users {
 
                     out.log("ERROR", "Users.listUsers", "Encountered error " + result["status"] + ": " + result["detail"]);
                 } else {
+                    out.log("INFO", "Users.createUser", "Created user " + userModel["userName"]);
                     res.writeHead(201, {"Content-Type": "text/json"});
+                    out.log("INFO", "Users.createUser", "After writting headers");
                 }
-
+                out.log("INFO", "Users.createUser", "Preparing json result");
                 let jsonResult = JSON.stringify(result);
                 out.logToFile(jsonResult);
 
+                out.log("INFO", "Users.createUser", "Sending Response");
                 res.end(jsonResult);
-            });
+            })
         });
     }
 
@@ -137,11 +136,6 @@ class Users {
         let userId = req.params.userId;
 
         let requestBody = "";
-
-        if (!req.data) {
-            res.writeHead(400, {"Content-Type": "text/plain"});
-            res.end();
-        }
 
         req.on("data", function (data) {
             requestBody += data;
@@ -196,10 +190,6 @@ class Users {
         let userId = req.params.userId;
 
         let requestBody = "";
-        if (!req.data) {
-            res.writeHead(400, {"Content-Type": "text/plain"});
-            res.end();
-        }
 
         req.on("data", function (data) {
             requestBody += data;
