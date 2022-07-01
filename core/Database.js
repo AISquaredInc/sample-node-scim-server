@@ -222,8 +222,8 @@ class Database {
                     if (err !== null) {
                         callback(scimCore.createSCIMError(err, "400"));
                     } else {
-                        rows["groups"] = self.getGroupsForUser(rows["id"], memberships);
-                        callback(scimCore.parseSCIMUser(rows, reqUrl));
+                        rows[0]["groups"] = self.getGroupsForUser(rows[0]["id"], memberships);
+                        callback(scimCore.parseSCIMUser(rows[0], reqUrl));
                     }
                 });
             }
