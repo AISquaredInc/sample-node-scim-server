@@ -74,8 +74,8 @@ class Database {
     }
 
     static async getFilteredUsers(filterAttribute, filterValue, startIndex, count, reqUrl, callback) {
+        let query = "SELECT * FROM \"Users\" WHERE " + "\"" + filterAttribute + "\"=" + filterValue.replace(/"/g,"'");
 
-        let query = "SELECT * FROM \"Users\" WHERE " + "\"" + filterAttribute + "\"" + "='" + filterValue + "'";
         let self = this;
         try {
             let result = await knex.raw(query);
