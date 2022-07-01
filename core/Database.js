@@ -92,8 +92,12 @@ class Database {
                     if (err !== null) {
                         callback(scimCore.createSCIMError(err, "400"));
                     } else {
-                        for (let i = 0; i < rows.length; i++) {
-                            rows[i]["groups"] = self.getGroupsForUser(rows[i]["id"], memberships);
+                        if (memberships !== null) {
+                            for (let i = 0; i < rows.length; i++) {
+                                console.log(rows[i]);
+                                console.log(memberships);
+                                rows[i]["groups"] = self.getGroupsForUser(rows[i]["id"], memberships);
+                            }
                         }
 
                         callback(scimCore.createSCIMUserList(rows, startIndex, count, reqUrl));
@@ -222,6 +226,8 @@ class Database {
                     if (err !== null) {
                         callback(scimCore.createSCIMError(err, "400"));
                     } else {
+                        console.log(rows);
+                        console.log(rows[0]);
                         rows[0]["groups"] = self.getGroupsForUser(rows[0]["id"], memberships);
                         callback(scimCore.parseSCIMUser(rows[0], reqUrl));
                     }
