@@ -94,8 +94,6 @@ class Database {
                     } else {
                         if (memberships !== null) {
                             for (let i = 0; i < rows.length; i++) {
-                                console.log(rows[i]);
-                                console.log(memberships);
                                 rows[i]["groups"] = self.getGroupsForUser(rows[i]["id"], memberships);
                             }
                         }
