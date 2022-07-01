@@ -544,7 +544,9 @@ class Database {
                     query = query + ";";
 
                     try {
-                        let insertGroupMembershipsResult = await knex.raw(query);
+                        if (members.length > 0) {
+                            let insertGroupMembershipsResult = await knex.raw(query);
+                        }
                         callback(scimCore.createSCIMGroup(groupId, groupModel["displayName"], members, reqUrl));
                     } catch (e) {
                         out.error("Database.updateGroup::MEMBERSHIPS", e);
