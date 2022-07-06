@@ -576,7 +576,7 @@ class Database {
     }
 
     static async getGroupMemberships(callback) {
-        let query = "SELECT m.\"groupId\", m.\"userId\", g.\"displayName\", u.\"givenName\", u.\"familyName\" " +
+        let query = "SELECT m.\"groupId\", m.\"userId\", g.\"displayName\", u.\"givenName\", u.\"familyName\", u.\"userName\" " +
                     "FROM \"GroupMemberships\" m " +
                     "LEFT JOIN \"Groups\" g ON m.\"groupId\" = g.id " +
                     "LEFT JOIN \"Users\" u ON m.\"userId\" = u.id";
@@ -590,7 +590,7 @@ class Database {
                 let memberships = [];
 
                 for (let i = 0; i < rows.length; i++) {
-                    let userDisplay = rows[i]["givenName"] + " " + rows[i]["familyName"];
+                    let userDisplay = rows[i]["userName"];
                     memberships.push(mGroupMembership.createMembership(rows[i]["groupId"], rows[i]["userId"],
                         rows[i]["displayName"], userDisplay));
                 }
@@ -621,7 +621,7 @@ class Database {
         if (memberships) {
             for (let i = 0; i < memberships.length; i++) {
                 if (memberships[i]["groupId"] === String(groupId)) {
-                    groupUsers.push(mGroup.createUser(memberships[i]["userId"], memberships[i]["userName"]));
+                    groupUsers.push(mGroup.createUser(memberships[i]["userId"], memberships[i]["userDisplay"]));
                 }
             }
         }
