@@ -473,9 +473,10 @@ class Database {
             if (rows.length === 0) {
                 callback(scimCore.createSCIMError("User Not Found", "404"));
             } else {
+                let isUserActive = userModel["active"] ? 1 : 0;
                 query = "UPDATE \"Users\" SET \"userName\" = '" + userModel["userName"] + "', \"givenName\" = '" + userModel["givenName"] +
                     "', \"middleName\" = '" + userModel["middleName"] + "', \"familyName\" = '" + userModel["familyName"] +
-                    "', email = '" + userModel["email"] + "' WHERE id = '" + String(userId) + "'";
+                    "', email = '" + userModel["email"] + "', active=" + isUserActive + " WHERE id = '" + String(userId) + "'";
 
                 try {
                     let updateUserResult = await knex.raw(query);
