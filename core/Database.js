@@ -540,9 +540,25 @@ class Database {
                     let members = groupModel["members"];
                     let membershipId = null;
 
+                    query = "SELECT * FROM \"GroupMemberships\" WHERE \"groupId\"= '" + String(groupId) + "'";
+                    let membershipResult = await knex.raw(query);
+                    let currentMembership = membershipResult.rows;                    
+
                     query = "INSERT INTO \"GroupMemberships\" (id, \"userId\", \"groupId\") VALUES";
 
                     for (let i = 0; i < members.length; i++) {
+                        let memberId = members[i]["value"];
+                        
+                        // If we already have the group membership, continue:
+                        if (currentMembership && currentMembership.length > 0) {
+                            let isMember = currentMembership.filter((user) => {
+                                return user.userId === memberId;
+                            });
+                            if (isMember) {
+                                continue;
+                            }
+                        }
+
                         if (i > 0) {
                             query = query + ",";
                         }
@@ -555,7 +571,8 @@ class Database {
                     query = query + ";";
 
                     try {
-                        if (members.length > 0) {
+                        // If query includes groupId, there's at least one group membership to insert:
+                        if (query.includes(groupId)) {
                             let insertGroupMembershipsResult = await knex.raw(query);
                         }
                         callback(scimCore.createSCIMGroup(groupId, groupModel["displayName"], members, reqUrl));
