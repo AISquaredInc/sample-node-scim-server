@@ -621,7 +621,7 @@ class Database {
         if (memberships) {
             for (let i = 0; i < memberships.length; i++) {
                 if (memberships[i]["groupId"] === String(groupId)) {
-                    groupUsers.push(mGroup.createUser(memberships[i]["userId"], memberships[i]["userDisplay"]));
+                    groupUsers.push(mGroup.createUser(memberships[i]["userId"], memberships[i]["userName"]));
                 }
             }
         }
