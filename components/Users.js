@@ -93,7 +93,6 @@ class Users {
         let requestBody = "";
 
         req.on('data', function (data) {
-            out.log("INFO", "Users.createUser", "Entered onData");
             requestBody += data;
             let userJsonData = JSON.parse(requestBody);
 
