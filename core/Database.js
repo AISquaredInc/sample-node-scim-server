@@ -21,15 +21,16 @@ let out = require('./Logs');
 let mUser = require('../models/User');
 let mGroup = require('../models/Group');
 let mGroupMembership = require('../models/GroupMembership');
+let { VAULT_CONSTANTS } = require("../utils/constants");
 
 let config = {
     client: pgClient,
     connection: {
-        host: process.env["POSTGRESQL_HOST"],
-        port: process.env["POSTGRESQL_PORT"],
-        user: process.env["POSTGRESQL_USER"],
-        password: process.env["POSTGRESQL_PASSWORD"],
-        database: process.env["POSTGRESQL_DATABASE"]
+        host: process.env[VAULT_CONSTANTS.POSTGRESQL_HOST],
+        port: process.env[VAULT_CONSTANTS.POSTGRESQL_PORT],
+        user: process.env[VAULT_CONSTANTS.POSTGRESQL_USER],
+        password: process.env[VAULT_CONSTANTS.POSTGRESQL_PASSWORD],
+        database: process.env[VAULT_CONSTANTS.POSTGRESQL_DATABASE]
     }
 }
 let knex = Knex(config);
