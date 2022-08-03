@@ -625,9 +625,11 @@ class Database {
     static getGroupsForUser(userId, memberships) {
         let userGroups = [];
 
-        for (let i = 0; i < memberships.length; i++) {
-            if (memberships[i]["userId"] === String(userId)) {
-                userGroups.push(mUser.createGroup(memberships[i]["groupId"], memberships[i]["groupDisplay"]));
+        if (memberships) {
+            for (let i = 0; i < memberships.length; i++) {
+                if (memberships[i]["userId"] === String(userId)) {
+                    userGroups.push(mUser.createGroup(memberships[i]["groupId"], memberships[i]["groupDisplay"]));
+                }
             }
         }
 
