@@ -516,7 +516,7 @@ class Database {
                     query = query + ";";
 
                     try {
-                        if (groups.length > 0) {
+                        if (query.includes(userId)) {
                             let insertGroupMembershipsResult = await knex.raw(query);
                         }
                         callback(scimCore.createSCIMUser(userId, rows.active, userModel["userName"], userModel["givenName"],
