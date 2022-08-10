@@ -485,9 +485,25 @@ class Database {
                     let groups = userModel["groups"];
                     let membershipId = null;
 
+                    query = "SELECT * FROM \"GroupMemberships\" WHERE \"userId\"= '" + String(userId) + "'";
+                    let membershipResult = await knex.raw(query);
+                    let currentMembership = membershipResult.rows;   
+
                     query = "INSERT INTO \"GroupMemberships\" (id, \"groupId\", \"userId\") VALUES";
 
                     for (let i = 0; i < groups.length; i++) {
+                        let groupId = groups[i]["value"];
+
+                        // If we already have the group membership, continue:
+                        if (currentMembership && currentMembership.length > 0) {
+                            let isMember = currentMembership.filter((membership) => {
+                                return membership.groupId === groupId;
+                            });
+                            if (isMember) {
+                                continue;
+                            }
+                        }
+
                         if (i > 0) {
                             query = query + ",";
                         }
