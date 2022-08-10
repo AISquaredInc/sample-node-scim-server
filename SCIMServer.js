@@ -88,6 +88,12 @@ app.patch('/scim/v2/Groups/:groupId', cGroups.patchGroup);
 app.put('/scim/v2/Groups/:groupId', cGroups.updateGroup);
 
 /**
+ * PUT {{baseUrl}}/scim/v2/Groups/{{groupId}}
+ * Delete a group
+ */
+app.delete('/scim/v2/Groups/:groupId', cGroups.deleteGroup);
+
+/**
  * GET {{baseUrl}}/scim/v2
  * Default SCIM endpoint
  */

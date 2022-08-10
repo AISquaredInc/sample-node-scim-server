@@ -594,6 +594,27 @@ class Database {
         }
     }
 
+    static async deleteGroup(groupId, reqUrl, callback) {
+        let displayName = "";
+
+        try {
+            let result = await knex("Groups")
+            .where('id', groupId).delete(['id','displayName']);
+            if (result.length === 0) {
+                out.log("ERROR", "Database.deleteGroup::DELETE", "Group not found");
+                callback(scimCore.createSCIMError("Group Not Found", "404"));
+            } else {
+                displayName = result[0].displayName;
+                await knex("GroupMemberships")
+                .where('groupId', groupId).delete();
+                callback(scimCore.createSCIMGroup(groupId, displayName, [], reqUrl));
+            }
+        } catch (e) {
+            out.error("Database.deleteGroup::DELETE", e);
+            callback(scimCore.createSCIMError(e, "400"));
+        }
+    }
+
     static async getGroupMemberships(callback) {
         let query = "SELECT m.\"groupId\", m.\"userId\", g.\"displayName\", u.\"givenName\", u.\"familyName\", u.\"userName\" " +
                     "FROM \"GroupMemberships\" m " +
