@@ -94,11 +94,6 @@ class Groups {
         let reqUrl = urlParts.pathname;
         let requestBody = "";
 
-        if (!req.data) {
-            res.writeHead(400, {"Content-Type": "text/plain"});
-            res.end();
-        }
-
         req.on('data', function (data) {
             requestBody += data;
             let groupJsonData = JSON.parse(requestBody);
@@ -137,11 +132,6 @@ class Groups {
         let groupId = req.params.groupId;
 
         let requestBody = "";
-
-        if (!req.data) {
-            res.writeHead(400, {"Content-Type": "text/plain"});
-            res.end();
-        }
 
         req.on("data", function (data) {
             requestBody += data;
@@ -196,11 +186,6 @@ class Groups {
         let groupId = req.params.groupId;
 
         let requestBody = "";
-
-        if (!req.data) {
-            res.writeHead(400, {"Content-Type": "text/plain"});
-            res.end();
-        }
 
         req.on("data", function (data) {
             requestBody += data;

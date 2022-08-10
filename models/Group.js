@@ -57,7 +57,7 @@ class Group  {
         };
 
         user["value"] = userId;
-        user["$ref"] = "../Users/" + userId;
+        user["$ref"] = "/Users/" + userId;
         user["display"] = displayName;
 
         return user;

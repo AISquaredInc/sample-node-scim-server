@@ -28,7 +28,7 @@ class User  {
         user["active"] = userJsonData["active"];
         user["userName"] = userJsonData["userName"];
         user["givenName"] = userJsonData["name"]["givenName"];
-        user["middleName"] = userJsonData["name"]["middleName"];
+        user["middleName"] = userJsonData["name"]["middleName"] ?? "";
         user["familyName"] = userJsonData["name"]["familyName"];
         user["email"] = userJsonData["emails"][0]["value"];
 

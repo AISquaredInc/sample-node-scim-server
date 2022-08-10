@@ -21,15 +21,16 @@ let out = require('./Logs');
 let mUser = require('../models/User');
 let mGroup = require('../models/Group');
 let mGroupMembership = require('../models/GroupMembership');
+let { VAULT_CONSTANTS } = require("../utils/constants");
 
 let config = {
     client: pgClient,
     connection: {
-        host: process.env["POSTGRESQL_HOST"],
-        port: process.env["POSTGRESQL_PORT"],
-        user: process.env["POSTGRESQL-USER"],
-        password: process.env["POSTGRESQL-PASSWORD"],
-        database: process.env["POSTGRESQL_DATABASE"]
+        host: process.env[VAULT_CONSTANTS.POSTGRESQL_HOST],
+        port: process.env[VAULT_CONSTANTS.POSTGRESQL_PORT],
+        user: process.env[VAULT_CONSTANTS.POSTGRESQL_USER],
+        password: process.env[VAULT_CONSTANTS.POSTGRESQL_PASSWORD],
+        database: process.env[VAULT_CONSTANTS.POSTGRESQL_DATABASE]
     }
 }
 let knex = Knex(config);
@@ -74,8 +75,8 @@ class Database {
     }
 
     static async getFilteredUsers(filterAttribute, filterValue, startIndex, count, reqUrl, callback) {
+        let query = "SELECT * FROM \"Users\" WHERE " + "\"" + filterAttribute + "\"=" + filterValue.replace(/"/g,"'");
 
-        let query = "SELECT * FROM \"Users\" WHERE " + "\"" + filterAttribute + "\"" + "='" + filterValue + "'";
         let self = this;
         try {
             let result = await knex.raw(query);
@@ -92,8 +93,10 @@ class Database {
                     if (err !== null) {
                         callback(scimCore.createSCIMError(err, "400"));
                     } else {
-                        for (let i = 0; i < rows.length; i++) {
-                            rows[i]["groups"] = self.getGroupsForUser(rows[i]["id"], memberships);
+                        if (memberships !== null) {
+                            for (let i = 0; i < rows.length; i++) {
+                                rows[i]["groups"] = self.getGroupsForUser(rows[i]["id"], memberships);
+                            }
                         }
 
                         callback(scimCore.createSCIMUserList(rows, startIndex, count, reqUrl));
@@ -222,8 +225,10 @@ class Database {
                     if (err !== null) {
                         callback(scimCore.createSCIMError(err, "400"));
                     } else {
-                        rows["groups"] = self.getGroupsForUser(rows["id"], memberships);
-                        callback(scimCore.parseSCIMUser(rows, reqUrl));
+                        if (memberships !== null) {
+                            rows[0]["groups"] = self.getGroupsForUser(rows[0]["id"], memberships);
+                        }
+                        callback(scimCore.parseSCIMUser(rows[0], reqUrl));
                     }
                 });
             }
@@ -249,8 +254,8 @@ class Database {
                     if (err !== null) {
                         callback(scimCore.createSCIMError(err, "400"));
                     } else {
-                        rows["members"] = self.getUsersForGroup(rows["id"], memberships);
-                        callback(scimCore.parseSCIMGroup(rows, reqUrl));
+                        rows[0]["members"] = self.getUsersForGroup(rows[0]["id"], memberships);
+                        callback(scimCore.parseSCIMGroup(rows[0], reqUrl));
                     }
                 });
             }
@@ -267,17 +272,18 @@ class Database {
            let selectResult = await knex.raw(query);
            let selectRows = selectResult.rows;
 
-           if (rows.length === 0) {
+           if (selectRows.length === 0) {
                let userId = uuidv4();
+               let isUserActive = userModel["active"] ? 1 : 0;
                query = "INSERT INTO \"Users\" (id, active, \"userName\", \"givenName\", \"middleName\", \"familyName\", email) \
-                         VALUES ('" + userId +"', '" + userModel["active"] + "', '" + userModel["userName"] +
+                         VALUES ('" + userId +"', " + isUserActive + ", '" + userModel["userName"] +
                         "', '" + userModel["givenName"] + "', '" + userModel["middleName"] + "', '" +
                         userModel["familyName"] + "', '" + userModel["email"] + "')";
 
                try {
                    let insertResult = await knex.raw(query);
                    let groups = userModel["groups"];
-
+                   out.log("DEBUG", "Database.createUser::GROUPS", "Received " + groups.length + " groups for user " + userId);
                    if (groups.length === 0) {
                        callback(scimCore.createSCIMUser(userId, true, userModel["userName"], userModel["givenName"],
                            userModel["middleName"], userModel["familyName"], userModel["email"],
@@ -299,7 +305,9 @@ class Database {
                        query = query + ";";
 
                        try {
-                           let membershipInsert = await knex.raw(query);
+                            if (groups.length > 0) {
+                                let membershipInsert = await knex.raw(query);
+                            }
                            callback(scimCore.createSCIMUser(userId, true, userModel["userName"], userModel["givenName"],
                                userModel["middleName"], userModel["familyName"], userModel["email"],
                                groups, reqUrl));
@@ -336,7 +344,7 @@ class Database {
             if (rows.length === 0) {
                 let groupId = uuidv4();
 
-                query = "INSERT INTO Groups (id, \"displayName\") \
+                query = "INSERT INTO \"Groups\" (id, \"displayName\") \
                          VALUES ('" + groupId + "', '" + groupModel["displayName"] + "')";
 
                 try {
@@ -364,7 +372,9 @@ class Database {
                         query = query + ";";
 
                         try {
-                            let groupMembershipInsert = await knex.raw(query);
+                            if (members.length > 0) {
+                                let groupMembershipInsert = await knex.raw(query);
+                            }
                             callback(scimCore.createSCIMGroup(groupId, groupModel["displayName"], members, reqUrl));
                         } catch (e) {
                             out.error("Database.createGroup::MEMBERSHIPS", err);
@@ -464,9 +474,10 @@ class Database {
             if (rows.length === 0) {
                 callback(scimCore.createSCIMError("User Not Found", "404"));
             } else {
+                let isUserActive = userModel["active"] ? 1 : 0;
                 query = "UPDATE \"Users\" SET \"userName\" = '" + userModel["userName"] + "', \"givenName\" = '" + userModel["givenName"] +
                     "', \"middleName\" = '" + userModel["middleName"] + "', \"familyName\" = '" + userModel["familyName"] +
-                    "', email = '" + userModel["email"] + "' WHERE id = '" + String(userId) + "'";
+                    "', email = '" + userModel["email"] + "', active=" + isUserActive + " WHERE id = '" + String(userId) + "'";
 
                 try {
                     let updateUserResult = await knex.raw(query);
@@ -489,7 +500,9 @@ class Database {
                     query = query + ";";
 
                     try {
-                        let insertGroupMembershipsResult = await knex.raw(query);
+                        if (groups.length > 0) {
+                            let insertGroupMembershipsResult = await knex.raw(query);
+                        }
                         callback(scimCore.createSCIMUser(userId, rows.active, userModel["userName"], userModel["givenName"],
                             userModel["middleName"], userModel["familyName"], userModel["email"],
                             groups, reqUrl));
@@ -528,9 +541,25 @@ class Database {
                     let members = groupModel["members"];
                     let membershipId = null;
 
+                    query = "SELECT * FROM \"GroupMemberships\" WHERE \"groupId\"= '" + String(groupId) + "'";
+                    let membershipResult = await knex.raw(query);
+                    let currentMembership = membershipResult.rows;                    
+
                     query = "INSERT INTO \"GroupMemberships\" (id, \"userId\", \"groupId\") VALUES";
 
                     for (let i = 0; i < members.length; i++) {
+                        let memberId = members[i]["value"];
+                        
+                        // If we already have the group membership, continue:
+                        if (currentMembership && currentMembership.length > 0) {
+                            let isMember = currentMembership.filter((user) => {
+                                return user.userId === memberId;
+                            });
+                            if (isMember) {
+                                continue;
+                            }
+                        }
+
                         if (i > 0) {
                             query = query + ",";
                         }
@@ -543,7 +572,10 @@ class Database {
                     query = query + ";";
 
                     try {
-                        let insertGroupMembershipsResult = await knex.raw(query);
+                        // If query includes groupId, there's at least one group membership to insert:
+                        if (query.includes(groupId)) {
+                            let insertGroupMembershipsResult = await knex.raw(query);
+                        }
                         callback(scimCore.createSCIMGroup(groupId, groupModel["displayName"], members, reqUrl));
                     } catch (e) {
                         out.error("Database.updateGroup::MEMBERSHIPS", e);
@@ -563,10 +595,10 @@ class Database {
     }
 
     static async getGroupMemberships(callback) {
-        let query = "SELECT m.groupId, m.userId, g.displayName, u.givenName, u.familyName " +
+        let query = "SELECT m.\"groupId\", m.\"userId\", g.\"displayName\", u.\"givenName\", u.\"familyName\", u.\"userName\" " +
                     "FROM \"GroupMemberships\" m " +
-                    "LEFT JOIN \"Groups\" g ON m.groupId = g.id " +
-                    "LEFT JOIN \"Users\" u ON m.userId = u.id";
+                    "LEFT JOIN \"Groups\" g ON m.\"groupId\" = g.id " +
+                    "LEFT JOIN \"Users\" u ON m.\"userId\" = u.id";
         try {
             let result = await knex.raw(query);
             let rows = result.rows;
@@ -577,7 +609,7 @@ class Database {
                 let memberships = [];
 
                 for (let i = 0; i < rows.length; i++) {
-                    let userDisplay = rows[i]["givenName"] + " " + rows[i]["familyName"];
+                    let userDisplay = rows[i]["userName"];
                     memberships.push(mGroupMembership.createMembership(rows[i]["groupId"], rows[i]["userId"],
                         rows[i]["displayName"], userDisplay));
                 }
@@ -593,9 +625,11 @@ class Database {
     static getGroupsForUser(userId, memberships) {
         let userGroups = [];
 
-        for (let i = 0; i < memberships.length; i++) {
-            if (memberships[i]["userId"] === String(userId)) {
-                userGroups.push(mUser.createGroup(memberships[i]["groupId"], memberships[i]["groupDisplay"]));
+        if (memberships) {
+            for (let i = 0; i < memberships.length; i++) {
+                if (memberships[i]["userId"] === String(userId)) {
+                    userGroups.push(mUser.createGroup(memberships[i]["groupId"], memberships[i]["groupDisplay"]));
+                }
             }
         }
 
@@ -604,11 +638,12 @@ class Database {
 
     static getUsersForGroup(groupId, memberships) {
         let groupUsers = [];
-
-        for (let i = 0; i < memberships.length; i++) {
-            if (memberships[i]["groupId"] === String(groupId))
-            {
-                groupUsers.push(mGroup.createUser(memberships[i]["userId"], memberships[i]["userDisplay"]));
+        
+        if (memberships) {
+            for (let i = 0; i < memberships.length; i++) {
+                if (memberships[i]["groupId"] === String(groupId)) {
+                    groupUsers.push(mGroup.createUser(memberships[i]["userId"], memberships[i]["userDisplay"]));
+                }
             }
         }
 
