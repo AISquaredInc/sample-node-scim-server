@@ -215,6 +215,32 @@ class Groups {
             });
         });
     }
+
+    static deleteGroup(req, res) {
+        out.log("INFO", "Groups.deleteGroup", "Got request: " + req.url);
+
+        let groupId = req.params.groupId;
+
+        let reqUrl = req.url;
+
+        db.deleteGroup(groupId, reqUrl, function (result) {
+            if (result["status"] !== undefined) {
+                if (result["status"] === "400") {
+                    res.writeHead(400, {"Content-Type": "text/plain"});
+                } else if (result["status"] === "404") {
+                    res.writeHead(404, {"Content-Type": "text/plain"});
+                }
+
+                out.log("ERROR", "Groups.deleteGroup", "Encountered error " + result["status"] + ": " + result["detail"]);
+            } else {
+                res.writeHead(200, {"Content-Type": "text/json"});
+            }
+            let jsonResult = JSON.stringify(result);
+            out.logToFile(jsonResult);
+
+            res.end(jsonResult);
+        });
+    }
 }
 
 module.exports = Groups;
